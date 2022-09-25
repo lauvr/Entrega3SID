@@ -9,6 +9,8 @@
 /[Bb]uilds/
 /[Ll]ogs/
 /[Mm]emoryCaptures/
+/Assets/AssetStoreTools*
+/[Aa]ssets/Firebase/
 
 # Never ignore Asset meta data
 !/[Aa]ssets/**/*.meta
