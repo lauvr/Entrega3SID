@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using Firebase.Database;
 
 public class ButtonLogin : MonoBehaviour
 {
@@ -21,6 +22,8 @@ public class ButtonLogin : MonoBehaviour
     public event Action<FirebaseUser> OnLoginSucceded;
     public event Action<string> OnLoginFailed;
 
+    DatabaseReference mDatabase;
+    string userID;
 
     private void Reset()
     {
@@ -34,6 +37,7 @@ public class ButtonLogin : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        mDatabase = FirebaseDatabase.DefaultInstance.RootReference;
         _loginButton.onClick.AddListener(HandleLoginButtonClicked);
     }
 
@@ -61,9 +65,22 @@ public class ButtonLogin : MonoBehaviour
         {
             Debug.Log($"Login succeeded with {loginTask.Result}");
             OnLoginSucceded?.Invoke(loginTask.Result);
+
+            SetUserOnline();
+
             SceneManager.LoadScene("Game");
         }
     }
 
-    
+    private void SetUserOnline()
+    {
+        UserData data = new UserData();
+
+        data.online = false;
+        string json = JsonUtility.ToJson(data);
+        string userID = FirebaseAuth.DefaultInstance.CurrentUser.UserId;
+
+        mDatabase.Child("users").Child(userID).Child("online").SetValueAsync(true);
+    }
+
 }
