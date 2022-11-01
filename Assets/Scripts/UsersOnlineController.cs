@@ -42,6 +42,7 @@ public class UsersOnlineController : MonoBehaviour
         foreach (string item in onlineUsersList)
         {
             templateText.GetComponent<Text>().text += item + Environment.NewLine;
+            Debug.Log("item: "+ item);
         }
     }
 
@@ -68,11 +69,12 @@ public class UsersOnlineController : MonoBehaviour
         Debug.Log(userConnected["username"] + " is online");
         //onlineText.text = userConnected["username"].ToString();
 
-        
+        onlineUsersList.Add(userConnected["username"].ToString());
     }
 
     private void HandleChildRemoved(object sender, ChildChangedEventArgs args)
     {
+
         if (args.DatabaseError != null)
         {
             Debug.LogError(args.DatabaseError.Message);
@@ -80,6 +82,8 @@ public class UsersOnlineController : MonoBehaviour
         }
         Dictionary<string, object> userDisconnected = (Dictionary<string, object>)args.Snapshot.Value;
         Debug.Log(userDisconnected["username"] + " is offline");
+        
+        onlineUsersList.Remove(userDisconnected["username"].ToString());
     }
 
     private void HandleValueChanged(object sender, ValueChangedEventArgs args)
@@ -104,13 +108,13 @@ public class UsersOnlineController : MonoBehaviour
     {
         mDatabase.Child("users-online").Child(userID).Child("username").SetValueAsync(_GameState.username);
 
-        onlineUsersList.Add(_GameState.username);
+        
         
     }
 
     private void SetUserOffline()
     {
-        onlineUsersList.Remove(_GameState.username);
+        
         
         mDatabase.Child("users-online").Child(userID).SetValueAsync(null);
     }
