@@ -41,13 +41,13 @@ public class UsernameLabel : MonoBehaviour
             .GetValueAsync().ContinueWithOnMainThread(task => {
                 if (task.IsFaulted)
                 {
-                    Debug.Log(task.Exception);
+                    //Debug.Log(task.Exception);
                     _label.text = "Null";
                 }
                 else if (task.IsCompleted)
                 {
                     DataSnapshot snapshot = task.Result;
-                    Debug.Log(snapshot.Value);
+                   // Debug.Log(snapshot.Value);
 
                     _label.text = (string)snapshot.Value;
 

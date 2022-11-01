@@ -1922,7 +1922,7 @@ GameObject:
   - component: {fileID: 1082596201}
   - component: {fileID: 1082596200}
   m_Layer: 0
-  m_Name: Controller
+  m_Name: SceneManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

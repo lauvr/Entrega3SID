@@ -189,5 +189,5 @@ public class UserData
 {
    public int score;
    public string username;
-   public bool online;
 }
+

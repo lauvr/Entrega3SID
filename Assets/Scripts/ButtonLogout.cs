@@ -5,11 +5,14 @@ using Firebase.Auth;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using Firebase.Database;
+using System;
 
 public class ButtonLogout : MonoBehaviour, IPointerClickHandler{
 
     DatabaseReference mDatabase;
     string userID;
+
+    public event Action OnLogout;
 
     private void Start()
     {
@@ -19,19 +22,15 @@ public class ButtonLogout : MonoBehaviour, IPointerClickHandler{
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        SetUserOnline();
+        //SetUserOnline();
+
         FirebaseAuth.DefaultInstance.SignOut();
+
+        OnLogout?.Invoke();
+
         SceneManager.LoadScene("Home");
         Time.timeScale = 1;
     }
 
-    private void SetUserOnline()
-    {
-        UserData data = new UserData();
-
-        data.online = false;
-        string json = JsonUtility.ToJson(data);
-
-        mDatabase.Child("users").Child(userID).Child("online").SetValueAsync(false);
-    }
+  
 }

@@ -65,22 +65,9 @@ public class ButtonLogin : MonoBehaviour
         {
             Debug.Log($"Login succeeded with {loginTask.Result}");
             OnLoginSucceded?.Invoke(loginTask.Result);
-
-            SetUserOnline();
-
             SceneManager.LoadScene("Game");
         }
     }
 
-    private void SetUserOnline()
-    {
-        UserData data = new UserData();
-
-        data.online = false;
-        string json = JsonUtility.ToJson(data);
-        string userID = FirebaseAuth.DefaultInstance.CurrentUser.UserId;
-
-        mDatabase.Child("users").Child(userID).Child("online").SetValueAsync(true);
-    }
 
 }

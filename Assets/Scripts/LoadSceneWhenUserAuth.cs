@@ -5,7 +5,7 @@ using Firebase.Auth;
 using System;
 using UnityEngine.SceneManagement;
 using Firebase.Database;
-
+using Firebase.Extensions;
 
 public class LoadSceneWhenUserAuth : MonoBehaviour
 {
@@ -15,35 +15,67 @@ public class LoadSceneWhenUserAuth : MonoBehaviour
 
     DatabaseReference mDatabase;
     string userID;
+    string username;
 
     // Start is called before the first frame update
     void Start()
     {
-        mDatabase = FirebaseDatabase.DefaultInstance.RootReference;
+        //mDatabase = FirebaseDatabase.DefaultInstance.RootReference;
         FirebaseAuth.DefaultInstance.StateChanged += HandleAuthStateChange;
+        
     }
 
     private void HandleAuthStateChange(object sender, EventArgs e)
     {
         if (FirebaseAuth.DefaultInstance.CurrentUser != null)
         {
-            SetUserOnline();
+            //SetUserOnline();
             SceneManager.LoadScene(_sceneToLoad);
             Time.timeScale = 1;
         }
     }
-
+ 
+/*
     private void SetUserOnline()
     {
-        UserData data = new UserData();
+        OnlineUsersData data = new OnlineUsersData();
 
-        data.online = false;
-        string json = JsonUtility.ToJson(data);
+        Debug.Log("Set User Online");
         string userID = FirebaseAuth.DefaultInstance.CurrentUser.UserId;
+        
 
-        mDatabase.Child("users").Child(userID).Child("online").SetValueAsync(true);
-    }
+        var currentUser = FirebaseAuth.DefaultInstance.CurrentUser;
+        if (currentUser != null)
+        {
+            FirebaseDatabase.DefaultInstance
+             .GetReference("users/" + userID + "/username")
+             .GetValueAsync().ContinueWithOnMainThread(task => {
+                 if (task.IsFaulted)
+                 {
+                     Debug.Log(task.Exception);
+                     username = "Null";
+                 }
+                 else if (task.IsCompleted)
+                 {
+                     DataSnapshot snapshot = task.Result;
+                     Debug.Log("imprimiendo username " + snapshot.Value);
 
+                     username = (string)snapshot.Value;
+
+                 }
+             });
+        }
+
+        data.username = username;
+
+        Debug.Log("username = " + username);
+        Debug.Log("Data.username = " + data.username);
+        string json = JsonUtility.ToJson(data);
+
+        mDatabase.Child("users-online").Child(userID).SetRawJsonValueAsync(json);
+    }*/
+
+    
 }
 
     
