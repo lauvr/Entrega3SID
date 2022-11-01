@@ -65,7 +65,7 @@ public class ButtonLogin : MonoBehaviour
         {
             Debug.Log($"Login succeeded with {loginTask.Result}");
             OnLoginSucceded?.Invoke(loginTask.Result);
-            SceneManager.LoadScene("Game");
+            SceneManager.LoadScene("Lobby");
         }
     }
 

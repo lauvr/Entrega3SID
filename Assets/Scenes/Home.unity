@@ -1940,7 +1940,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2e206e77eba299d4eb8b49e7d941ae15, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _sceneToLoad: Game
+  _sceneToLoad: Lobby
 --- !u!4 &1082596201
 Transform:
   m_ObjectHideFlags: 0

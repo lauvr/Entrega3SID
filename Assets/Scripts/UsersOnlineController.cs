@@ -5,6 +5,8 @@ using UnityEngine;
 using System;
 using Firebase.Auth;
 using Firebase;
+using Firebase.Extensions;
+using UnityEngine.UI;
 
 public class UsersOnlineController : MonoBehaviour
 {
@@ -13,6 +15,12 @@ public class UsersOnlineController : MonoBehaviour
     string userID;
     [SerializeField]
     ButtonLogout _ButtonLogout;
+    
+
+   
+    public GameObject templateText;
+    public List<string> onlineUsersList = new List<string>();
+    
 
 
 
@@ -24,9 +32,17 @@ public class UsersOnlineController : MonoBehaviour
         _GameState.OnDataReady += InitUserOnlineController;
         userID = FirebaseAuth.DefaultInstance.CurrentUser.UserId;
 
-        /*FirebaseDatabase.DefaultInstance
-            .GetReference("users-online")
-            .ValueChanged += HandleValueChanged;*/
+        
+    }
+
+    private void Update()
+    {
+        templateText.GetComponent<Text>().text = "";
+
+        foreach (string item in onlineUsersList)
+        {
+            templateText.GetComponent<Text>().text += item + Environment.NewLine;
+        }
     }
 
     public void InitUserOnlineController()
@@ -38,12 +54,7 @@ public class UsersOnlineController : MonoBehaviour
         mDatabase.Child("users-online").ChildAdded += HandleChildAdded;
         mDatabase.Child("users-online").ChildRemoved += HandleChildRemoved;
         SetUserOnline();
-
-        /*FirebaseDatabase.DefaultInstance
-            .GetReference("users-online")
-            .ValueChanged += HandleValueChanged;*/
-
-        //GameObject.Find("LogoutButton").GetComponent<ButtonLogout>().OnLogout 
+        
     }
 
     private void HandleChildAdded(object sender, ChildChangedEventArgs args)
@@ -55,6 +66,9 @@ public class UsersOnlineController : MonoBehaviour
         }
         Dictionary<string, object> userConnected = (Dictionary<string, object>)args.Snapshot.Value;
         Debug.Log(userConnected["username"] + " is online");
+        //onlineText.text = userConnected["username"].ToString();
+
+        
     }
 
     private void HandleChildRemoved(object sender, ChildChangedEventArgs args)
@@ -89,10 +103,15 @@ public class UsersOnlineController : MonoBehaviour
     private void SetUserOnline()
     {
         mDatabase.Child("users-online").Child(userID).Child("username").SetValueAsync(_GameState.username);
+
+        onlineUsersList.Add(_GameState.username);
+        
     }
 
     private void SetUserOffline()
     {
+        onlineUsersList.Remove(_GameState.username);
+        
         mDatabase.Child("users-online").Child(userID).SetValueAsync(null);
     }
 
@@ -101,6 +120,5 @@ public class UsersOnlineController : MonoBehaviour
         SetUserOffline();
     }
 
-    
-
+  
 }

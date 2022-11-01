@@ -30,7 +30,7 @@ public class LoadSceneWhenUserAuth : MonoBehaviour
         if (FirebaseAuth.DefaultInstance.CurrentUser != null)
         {
             //SetUserOnline();
-            SceneManager.LoadScene(_sceneToLoad);
+            SceneManager.LoadScene("Lobby");
             Time.timeScale = 1;
         }
     }
