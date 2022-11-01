@@ -15,13 +15,20 @@ public class UsersOnlineController : MonoBehaviour
     string userID;
     [SerializeField]
     ButtonLogout _ButtonLogout;
-    
 
-   
+
+    public GameObject templateUserOnline;
+    GameObject g;
+
     public GameObject templateText;
-    public List<string> onlineUsersList = new List<string>();
-    
 
+    public GameObject userList;
+
+    public List<string> onlineUsersList = new List<string>();
+
+    bool isFirstTime;
+
+    List<GameObject> playersList = new List<GameObject>();
 
 
     void Start()
@@ -32,19 +39,46 @@ public class UsersOnlineController : MonoBehaviour
         _GameState.OnDataReady += InitUserOnlineController;
         userID = FirebaseAuth.DefaultInstance.CurrentUser.UserId;
 
+        isFirstTime = true;
+        //templateUserOnline = templateUserOnline.transform.gameObject;
+
         
     }
 
     private void Update()
     {
-        templateText.GetComponent<Text>().text = "";
+        CleanList();
+        Vector3 p = new Vector3(0, 0, 0);
+        foreach (string item in onlineUsersList)
+        {
+            g = Instantiate(templateUserOnline, userList.transform);
+            g.transform.GetChild(0).GetComponent<Text>().text = item;
+            //g.transform.GetChild(1).GetComponent<Button>().GetComponent<Text>().text = "hola";
+            g.transform.localPosition = p;
+            p += new Vector3(0, -25, 0);
+            playersList.Add(g);
+        }
+
+
+
+        /*templateText.GetComponent<Text>().text = "";
 
         foreach (string item in onlineUsersList)
         {
             templateText.GetComponent<Text>().text += item + Environment.NewLine;
             Debug.Log("item: "+ item);
+        }*/
+    }
+
+
+    public void CleanList()
+    {
+        foreach (GameObject item in playersList)
+        {
+            Destroy(item);
         }
     }
+
 
     public void InitUserOnlineController()
     {
