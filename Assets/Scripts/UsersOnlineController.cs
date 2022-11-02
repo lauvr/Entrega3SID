@@ -13,22 +13,32 @@ public class UsersOnlineController : MonoBehaviour
     DatabaseReference mDatabase;
     GameState _GameState;
     string userID;
+    string connectedUserID;
     [SerializeField]
     ButtonLogout _ButtonLogout;
-
+    Button addButton;
 
     public GameObject templateUserOnline;
-    GameObject g;
+    public GameObject templateRequests;
+    public GameObject templateFriends;
 
-    public GameObject templateText;
+    public Transform onlineTransform;
+    public Transform requestsTransform;
+    public Transform friendsTransform;
 
-    public GameObject userList;
-
-    public List<string> onlineUsersList = new List<string>();
-
-    bool isFirstTime;
+    Dictionary<string, object> onlineUsersList;
+    Dictionary<string, object> requestsList;
+    Dictionary<string, object> friendsList;
 
     List<GameObject> playersList = new List<GameObject>();
+
+
+    /*//requests
+    public GameObject reqList;
+    public GameObject templateRequests;
+    GameObject h;
+    List<GameObject> requestsList = new List<GameObject>();
+    public List<string> usersRequestingList = new List<string>();*/
 
 
     void Start()
@@ -39,45 +49,120 @@ public class UsersOnlineController : MonoBehaviour
         _GameState.OnDataReady += InitUserOnlineController;
         userID = FirebaseAuth.DefaultInstance.CurrentUser.UserId;
 
-        isFirstTime = true;
-        //templateUserOnline = templateUserOnline.transform.gameObject;
-
-        
+        FirebaseDatabase.DefaultInstance.GetReference("users-online").ValueChanged += InstantiateUsersOnline;
+        FirebaseDatabase.DefaultInstance.GetReference("users/" + _GameState.userID + "/friend-requests").ValueChanged += InstantiateRequests;
+        FirebaseDatabase.DefaultInstance.GetReference("users/" + _GameState.userID + "/friends").ValueChanged += InstantiateFriends;
     }
 
     private void Update()
     {
-        CleanList();
-        Vector3 p = new Vector3(0, 0, 0);
-        foreach (string item in onlineUsersList)
-        {
-            g = Instantiate(templateUserOnline, userList.transform);
-            g.transform.GetChild(0).GetComponent<Text>().text = item;
-            //g.transform.GetChild(1).GetComponent<Button>().GetComponent<Text>().text = "hola";
-            g.transform.localPosition = p;
-            p += new Vector3(0, -25, 0);
-            playersList.Add(g);
-        }
 
-
-
-        /*templateText.GetComponent<Text>().text = "";
-
-        foreach (string item in onlineUsersList)
-        {
-            templateText.GetComponent<Text>().text += item + Environment.NewLine;
-            Debug.Log("item: "+ item);
-        }*/
     }
 
-
-    public void CleanList()
+    void InstantiateUsersOnline(object sender, ValueChangedEventArgs args)
     {
-        foreach (GameObject item in playersList)
+        if (args.DatabaseError != null)
         {
-            Destroy(item);
+            Debug.LogError(args.DatabaseError.Message);
+        }
+        else if (args.Snapshot.Value != null)
+        {
+            for (int i = 0; i < onlineTransform.childCount; i++)
+            {
+                Destroy(onlineTransform.GetChild(i).gameObject);
+            }
+
+            onlineUsersList = (Dictionary<string, object>)args.Snapshot.Value;
+            Vector3 p = new Vector3(0, 0, 0);
+            foreach (var item in onlineUsersList)
+            {
+                if (item.Key != userID)
+                {
+                    var g = Instantiate(templateUserOnline, onlineTransform.transform);
+                    g.transform.GetChild(0).GetComponent<Text>().text = item.Key.ToString();
+                    //addButton = g.transform.GetChild(1).GetComponent<Button>();
+                    g.name = item.Key;
+                    g.transform.localPosition = p;
+                    p += new Vector3(0, -25, 0);
+                }
+            }
+
         }
     }
+
+    void InstantiateRequests(object sender, ValueChangedEventArgs args)
+    {
+        if (args.DatabaseError != null)
+        {
+            Debug.LogError(args.DatabaseError.Message);
+        }
+        else if (args.Snapshot.Value != null)
+        {
+            for (int i = 0; i < requestsTransform.childCount; i++)
+            {
+                Destroy(requestsTransform.GetChild(i).gameObject);
+            }
+
+            requestsList = (Dictionary<string, object>)args.Snapshot.Value;
+            
+            Vector3 p = new Vector3(0, 0, 0);
+            foreach (var item in requestsList)
+            {
+                var g = Instantiate(templateRequests, requestsTransform.transform);
+                g.transform.GetChild(0).GetComponent<Text>().text = item.Value.ToString();
+                //addButton = g.transform.GetChild(1).GetComponent<Button>();
+                g.name = item.Key;
+                g.transform.localPosition = p;
+                p += new Vector3(0, -25, 0);
+                
+            }
+
+        }
+        else
+        {
+            for (int i = 0; i < requestsTransform.childCount; i++)
+            {
+                Destroy(requestsTransform.GetChild(i).gameObject);
+            }
+        }
+    }
+
+    void InstantiateFriends(object sender, ValueChangedEventArgs args)
+    {
+        if (args.DatabaseError != null)
+        {
+            Debug.LogError(args.DatabaseError.Message);
+        }
+        else if (args.Snapshot.Value != null)
+        {
+            for (int i = 0; i < friendsTransform.childCount; i++)
+            {
+                Destroy(friendsTransform.GetChild(i).gameObject);
+            }
+
+            friendsList = (Dictionary<string, object>)args.Snapshot.Value;
+
+            Vector3 p = new Vector3(0, 0, 0);
+            foreach (var item in friendsList)
+            {
+                var g = Instantiate(templateFriends, friendsTransform.transform);
+                g.transform.GetChild(0).GetComponent<Text>().text = item.Value.ToString();
+                g.name = item.Key;
+                g.transform.localPosition = p;
+                p += new Vector3(0, -25, 0);
+
+            }
+
+        }
+        else
+        {
+            for (int i = 0; i < friendsTransform.childCount; i++)
+            {
+                Destroy(friendsTransform.GetChild(i).gameObject);
+            }
+        }
+    }
+
 
 
     public void InitUserOnlineController()
@@ -89,9 +174,8 @@ public class UsersOnlineController : MonoBehaviour
         mDatabase.Child("users-online").ChildAdded += HandleChildAdded;
         mDatabase.Child("users-online").ChildRemoved += HandleChildRemoved;
         SetUserOnline();
-        
     }
-
+      
     private void HandleChildAdded(object sender, ChildChangedEventArgs args)
     {
         if (args.DatabaseError != null)
@@ -101,23 +185,20 @@ public class UsersOnlineController : MonoBehaviour
         }
         Dictionary<string, object> userConnected = (Dictionary<string, object>)args.Snapshot.Value;
         Debug.Log(userConnected["username"] + " is online");
-        //onlineText.text = userConnected["username"].ToString();
-
-        onlineUsersList.Add(userConnected["username"].ToString());
+        //onlineUsersList.Add(userConnected["username"]);
     }
 
     private void HandleChildRemoved(object sender, ChildChangedEventArgs args)
     {
-
         if (args.DatabaseError != null)
         {
             Debug.LogError(args.DatabaseError.Message);
             return;
         }
         Dictionary<string, object> userDisconnected = (Dictionary<string, object>)args.Snapshot.Value;
-        Debug.Log(userDisconnected["username"] + " is offline");
         
-        onlineUsersList.Remove(userDisconnected["username"].ToString());
+        Debug.Log(userDisconnected["username"] + " is offline");
+        //onlineUsersList.Remove(userDisconnected["username"].ToString());
     }
 
     private void HandleValueChanged(object sender, ValueChangedEventArgs args)
@@ -141,16 +222,11 @@ public class UsersOnlineController : MonoBehaviour
     private void SetUserOnline()
     {
         mDatabase.Child("users-online").Child(userID).Child("username").SetValueAsync(_GameState.username);
-
-        
-        
     }
 
     private void SetUserOffline()
     {
-        
-        
-        mDatabase.Child("users-online").Child(userID).SetValueAsync(null);
+         mDatabase.Child("users-online").Child(userID).SetValueAsync(null);
     }
 
     void OnApplicationQuit()
